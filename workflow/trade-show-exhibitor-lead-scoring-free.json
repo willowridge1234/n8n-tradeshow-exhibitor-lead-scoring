@@ -1,0 +1,300 @@
+{
+  "id": "score-trade-show-exhibitors-icp-sheets-free",
+  "name": "Score trade-show exhibitors for ICP fit and log to Google Sheets",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Score trade-show exhibitors for ICP fit and log to Google Sheets\n\n### Who's it for\nB2B sales teams, field-sales teams, and agencies that want a prioritized exhibitor list before a conference or trade show.\n\n### What it does\nRun this workflow when an exhibitor directory is ready. It fetches the directory through the Apify actor you configure, normalizes the actor's output, removes duplicate companies, and caps the run at 25 exhibitors. An AI model scores each exhibitor against your ICP criteria and gives a short reason. Every scored exhibitor is appended to Google Sheets.\n\n### How to set up\n1. Create Apify Header Auth, OpenAI-compatible Header Auth, and Google Sheets OAuth credentials.\n2. Open **Your settings (EDIT ME)** and enter the event URLs, ICP, and fit criteria.\n3. In **Fetch exhibitor list (Apify)**, replace `YOUR-USERNAME~YOUR-ACTOR` and supply that actor's own input parameters in place of `{}`.\n4. Point **Log scored exhibitors (Google Sheets)** at a sheet with the header row below.\n\n### Requirements\nAn n8n instance, an Apify account and suitable exhibitor-directory actor, an OpenAI-compatible API key, and a Google account. Service and actor usage may cost money.\n\n### How to customize\nUse a different actor and its matching input parameters for another event. The output normalizer is actor-agnostic and maps common exhibitor field aliases. Edit the aliases only if your actor returns different field names. Change your ICP criteria in the settings node. The free edition processes at most 25 exhibitors per run.\n\nSheet header row (exact):\nprocessedAt companyName contactName contactEmail website boothOrListingDetail sourceUrl tradeShowUrl exhibitorDirectoryUrl icpScore reason",
+        "height": 760,
+        "width": 560
+      },
+      "id": "overview-sticky",
+      "name": "Sticky Note - Read me first",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-1120, -1160]
+    },
+    {
+      "parameters": {
+        "content": "## 1. Credentials (3 required)\n\n**Apify Header Auth:** create a Header Auth credential with header name `Authorization` and a Bearer value using your Apify token.\n\n**OpenAI-compatible Header Auth:** create a separate Header Auth credential with header name `Authorization` and a Bearer value using your AI API key.\n\n**Google Sheets OAuth:** connect the Google account that owns the destination sheet.\n\nSelect each credential on its matching node after import.",
+        "width": 340,
+        "height": 300,
+        "color": 7
+      },
+      "id": "sticky-credentials",
+      "name": "Sticky Note - Credentials",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-1120, -360]
+    },
+    {
+      "parameters": {
+        "content": "## 2. Your settings\n\nOpen **Your settings (EDIT ME)** and enter:\n- the trade-show page and exhibitor-directory URLs\n- your ICP description\n- your ICP-fit criteria\n\nThe run cap is fixed at 25 in this free edition and is enforced before AI scoring.",
+        "width": 320,
+        "height": 260,
+        "color": 7
+      },
+      "id": "sticky-settings",
+      "name": "Sticky Note - Settings",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-760, -360]
+    },
+    {
+      "parameters": {
+        "content": "## 3. Exhibitor source (Apify)\n\nIn **Fetch exhibitor list (Apify)**, replace `YOUR-USERNAME~YOUR-ACTOR` with the actor ID in `username~actor-name` format. Replace the empty `{}` body with that actor's own documented input parameters.\n\nThe workflow can use any suitable exhibitor-directory actor when you supply that actor's required input. The input body is not universal.\n\nThe output normalizer is actor-agnostic: it maps common exhibitor aliases, removes blank company names, deduplicates by company, and stops at 25.",
+        "width": 400,
+        "height": 310,
+        "color": 7
+      },
+      "id": "sticky-source",
+      "name": "Sticky Note - Exhibitor source",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-400, -360]
+    },
+    {
+      "parameters": {
+        "content": "## 4. Scoring and Google Sheets\n\n**AI: score ICP fit** applies your criteria to each normalized exhibitor and returns a score with a short reason.\n\n**Re-attach exhibitor data** combines the result with the normalized company. **Parse AI verdict into exhibitor row** creates the final row shape.\n\n**Log scored exhibitors (Google Sheets)** appends every scored exhibitor, including low scores, to the `Exhibitors` tab. Use the exact header row shown in the overview note.",
+        "width": 500,
+        "height": 300,
+        "color": 7
+      },
+      "id": "sticky-output",
+      "name": "Sticky Note - Scoring and Sheets",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [40, -360]
+    },
+    {
+      "parameters": {},
+      "id": "manual-trigger-001",
+      "name": "Run for an upcoming trade show",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [-1080, 0]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "set-show-url",
+              "name": "tradeShowUrl",
+              "type": "string",
+              "value": "EDIT ME: https://example.com/events/YOUR-SHOW"
+            },
+            {
+              "id": "set-directory-url",
+              "name": "exhibitorDirectoryUrl",
+              "type": "string",
+              "value": "EDIT ME: https://example.com/events/YOUR-SHOW/exhibitors"
+            },
+            {
+              "id": "set-icp",
+              "name": "icpDescription",
+              "type": "string",
+              "value": "EDIT ME: Describe the companies your sales team can help and the buyers you want to meet."
+            },
+            {
+              "id": "set-criteria",
+              "name": "icpFitCriteria",
+              "type": "string",
+              "value": "EDIT ME: Describe what weak, moderate, and strong ICP fit means for this event."
+            },
+            {
+              "id": "set-max",
+              "name": "maxExhibitorsPerRun",
+              "type": "number",
+              "value": 25
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "settings-node-001",
+      "name": "Your settings (EDIT ME)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-840, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/YOUR-USERNAME~YOUR-ACTOR/run-sync-get-dataset-items",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "id": "http-apify-001",
+      "name": "Fetch exhibitor list (Apify)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-600, 0],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_AFTER_IMPORT",
+          "name": "Apify token (Header Auth)"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Normalize actor output, remove duplicate companies, and cap the run.\nconst settings = $('Your settings (EDIT ME)').first().json;\nconst maxExhibitors = Math.min(25, Math.max(1, Number(settings.maxExhibitorsPerRun) || 25));\nconst seen = new Set();\nconst out = [];\nfor (const item of $input.all()) {\n  const j = item.json ?? {};\n  if (j.error) continue;\n  const companyName = String(j.companyName ?? j.company ?? j.exhibitorName ?? j.name ?? j.title ?? '').trim();\n  if (!companyName) continue;\n  const key = companyName.toLowerCase().replace(/\\s+/g, ' ');\n  if (seen.has(key)) continue;\n  seen.add(key);\n  out.push({ json: {\n    companyName,\n    contactName: String(j.contactName ?? j.contact ?? j.representativeName ?? j.ownerName ?? ''),\n    contactEmail: String(j.contactEmail ?? j.email ?? ''),\n    website: String(j.website ?? j.websiteUrl ?? j.companyUrl ?? ''),\n    boothOrListingDetail: String(j.boothOrListingDetail ?? j.booth ?? j.boothNumber ?? j.location ?? j.description ?? j.category ?? ''),\n    sourceUrl: String(j.sourceUrl ?? j.url ?? j.profileUrl ?? settings.exhibitorDirectoryUrl ?? ''),\n    tradeShowUrl: settings.tradeShowUrl,\n    exhibitorDirectoryUrl: settings.exhibitorDirectoryUrl,\n    icpDescription: settings.icpDescription\n  } });\n  if (out.length >= maxExhibitors) break;\n}\nif (out.length === 0) return [{ json: { _empty: true, note: 'No exhibitors survived normalization this run.' } }];\nreturn out;"
+      },
+      "id": "code-normalize-001",
+      "name": "Normalize and dedupe exhibitors",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-360, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-notempty",
+              "leftValue": "={{ $json._empty }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "if-notempty-001",
+      "name": "Any exhibitors to score?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [-120, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'gpt-4o-mini', response_format: { type: 'json_object' }, messages: [ { role: 'system', content: 'Apply the user-provided ICP-fit criteria to this exhibitor. Return a conservative fit score from 1 to 10 and one concise reason. Missing evidence should lower the score. Respond with strict JSON only: {\\\"score\\\": <int 1-10>, \\\"reason\\\": \\\"<one sentence>\\\"}' }, { role: 'user', content: 'USER CRITERIA: ' + $('Your settings (EDIT ME)').first().json.icpFitCriteria + '\\n\\nIDEAL CUSTOMER PROFILE: ' + $json.icpDescription + '\\n\\nEXHIBITOR: ' + JSON.stringify({ companyName: $json.companyName, website: $json.website, boothOrListingDetail: $json.boothOrListingDetail, sourceUrl: $json.sourceUrl }) } ] }) }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "http-openai-001",
+      "name": "AI: score ICP fit",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [120, -100],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_AFTER_IMPORT",
+          "name": "OpenAI API (Header Auth)"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "id": "merge-001",
+      "name": "Re-attach exhibitor data",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [360, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse the AI response and create the final Google Sheets row.\nconst rows = [];\nfor (const item of $input.all()) {\n  const j = item.json ?? {};\n  let verdict = { score: 0, reason: 'AI call failed - inspect the execution log' };\n  try {\n    const content = j.choices?.[0]?.message?.content;\n    if (content) verdict = JSON.parse(content);\n  } catch (error) {\n    verdict = { score: 0, reason: 'AI returned unparseable output - inspect the execution log' };\n  }\n  rows.push({ json: {\n    processedAt: new Date().toISOString(),\n    companyName: String(j.companyName ?? ''),\n    contactName: String(j.contactName ?? ''),\n    contactEmail: String(j.contactEmail ?? ''),\n    website: String(j.website ?? ''),\n    boothOrListingDetail: String(j.boothOrListingDetail ?? ''),\n    sourceUrl: String(j.sourceUrl ?? ''),\n    tradeShowUrl: String(j.tradeShowUrl ?? ''),\n    exhibitorDirectoryUrl: String(j.exhibitorDirectoryUrl ?? ''),\n    icpScore: Math.min(10, Math.max(0, Number(verdict.score) || 0)),\n    reason: String(verdict.reason ?? '')\n  } });\n}\nreturn rows;"
+      },
+      "id": "code-parse-001",
+      "name": "Parse AI verdict into exhibitor row",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [600, 0]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "PASTE_YOUR_GOOGLE_SHEET_URL_HERE"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Exhibitors"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "options": {}
+        },
+        "options": {}
+      },
+      "id": "gsheets-001",
+      "name": "Log scored exhibitors (Google Sheets)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [840, 0],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_AFTER_IMPORT",
+          "name": "Google Sheets account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "Run for an upcoming trade show": {
+      "main": [[{"node": "Your settings (EDIT ME)", "type": "main", "index": 0}]]
+    },
+    "Your settings (EDIT ME)": {
+      "main": [[{"node": "Fetch exhibitor list (Apify)", "type": "main", "index": 0}]]
+    },
+    "Fetch exhibitor list (Apify)": {
+      "main": [[{"node": "Normalize and dedupe exhibitors", "type": "main", "index": 0}]]
+    },
+    "Normalize and dedupe exhibitors": {
+      "main": [[{"node": "Any exhibitors to score?", "type": "main", "index": 0}]]
+    },
+    "Any exhibitors to score?": {
+      "main": [[{"node": "AI: score ICP fit", "type": "main", "index": 0}, {"node": "Re-attach exhibitor data", "type": "main", "index": 1}], []]
+    },
+    "AI: score ICP fit": {
+      "main": [[{"node": "Re-attach exhibitor data", "type": "main", "index": 0}]]
+    },
+    "Re-attach exhibitor data": {
+      "main": [[{"node": "Parse AI verdict into exhibitor row", "type": "main", "index": 0}]]
+    },
+    "Parse AI verdict into exhibitor row": {
+      "main": [[{"node": "Log scored exhibitors (Google Sheets)", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "pinData": {}
+}
